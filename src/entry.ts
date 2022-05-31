@@ -6,7 +6,9 @@ import '@material/mwc-button'
 // import '@material/mwc-checkbox'
 
 import './main'
+import './editor-view'
 import './video-element'
+import './textarea-element'
 
 import { AppContainer } from './main';
 
