@@ -91,8 +91,8 @@ export class VideoElement extends LitElement {
     if (!this.playing) {
       this.togglePlay()
     }
+    // interval
     this._seekForEndInterval = setInterval(() => {
-
       if (this.playing) {
         if (this.videoElement.currentTime >= to) {
           if (this._seekForEndResolve) {
@@ -103,7 +103,7 @@ export class VideoElement extends LitElement {
           this.clearPlayFroTo()
         }
       }
-    }, 50)
+    }, 10)
   }
   cancelPlayFroTo () {
     if (this._seekForEndReject) {
