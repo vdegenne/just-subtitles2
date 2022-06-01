@@ -28,7 +28,7 @@ export class TextareaElement extends LitElement {
   render() {
     return html`
     <textarea id=textarea
-      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:roboto;"
+      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:roboto;border:none;outline:none;"
       @keyup=${()=>{this.onTextareaKeyup()}}>${this.captions}</textarea>
     `
   }

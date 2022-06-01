@@ -103,7 +103,7 @@ export class VideoElement extends LitElement {
           this.clearPlayFroTo()
         }
       }
-    }, 100)
+    }, 50)
   }
   cancelPlayFroTo () {
     if (this._seekForEndReject) {

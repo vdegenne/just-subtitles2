@@ -23,7 +23,7 @@ router.get('/ping', function (ctx) {
 
 router.get('/api/get-video-name', async ctx => {
   const url = new URL(ctx.request.header['referer'])
-  const refererPathName = url.pathname.slice(1)
+  const refererPathName = decodeURIComponent(url.pathname.slice(1))
   if (projectExists(refererPathName)) {
     const filepaths = await glob(`${localURI(refererPathName)}/*.mp4`)
     if (filepaths.length > 0) {
@@ -35,7 +35,7 @@ router.get('/api/get-video-name', async ctx => {
 
 router.post('/api/save-captions', async ctx => {
   const url = new URL(ctx.request.header['referer'])
-  const refererPathName = url.pathname.slice(1)
+  const refererPathName = decodeURIComponent(url.pathname.slice(1))
   if (projectExists(refererPathName)) {
     fs.writeFile(path.join(localURI(refererPathName), 'captions.vtt'), ctx.request.body, ()=>{})
     return ctx.body = ''
@@ -44,7 +44,7 @@ router.post('/api/save-captions', async ctx => {
 
 router.get('/api/get-captions', async ctx => {
   const url = new URL(ctx.request.header['referer'])
-  const refererPathName = url.pathname.slice(1)
+  const refererPathName = decodeURIComponent(url.pathname.slice(1))
   let captions
   if (projectExists(refererPathName)) {
     try {
@@ -60,7 +60,7 @@ router.get('/api/get-captions', async ctx => {
 app.use(router.routes()).use(router.allowedMethods())
 
 app.use(async ctx => {
-  const pathname = ctx.url.slice(1)
+  const pathname = decodeURIComponent(ctx.url.slice(1))
   if (fs.existsSync(path.join(localURI(pathname), 'meta.json'))) {
     ctx.set('content-type', 'text/html; charset=utf-8')
     ctx.body = fs.readFileSync(`docs/editor.html`)
@@ -75,7 +75,7 @@ app.listen(port, function () {
 
 function mp4Middleware () {
   return async function (ctx, next) {
-    const url = ctx.request.url;
+    const url = decodeURIComponent(ctx.request.url)
     const extension  = extname(url).slice(1)
 
     if (extension == 'mp4') {
