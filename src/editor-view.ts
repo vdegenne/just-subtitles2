@@ -88,7 +88,7 @@ export class EditorView extends LitElement {
 
 
 
-      if (e.altKey && e.code == 'Digit4') {
+      if (e.altKey && e.code == 'Digit0') {
         preventAll(e)
         // reach the video to startTime of current cue
         const timecode = this.textareaElement.getCurrentTimeCode()
@@ -96,7 +96,7 @@ export class EditorView extends LitElement {
           this.videoElement.currentTime = timecode.startTime.toSeconds()
         }
       }
-      if (e.altKey && e.code == 'Digit0') {
+      if (e.altKey && e.code == 'Digit4') {
         preventAll(e)
         // reach the video to startTime of current cue
         const timecode = this.textareaElement.getCurrentTimeCode()
@@ -116,7 +116,7 @@ export class EditorView extends LitElement {
         preventAll(e)
         this.playInterval()
       }
-      if (e.code == 'F1' || (e.shiftKey && e.code == 'KeyH')) {
+      if (e.code == 'F1' || (false && e.shiftKey && e.code == 'KeyH')) {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueStartTimeToLeft(0.1)
         // if (cue) {
@@ -127,7 +127,7 @@ export class EditorView extends LitElement {
         // }
         this.playInterval()
       }
-      if (e.code == 'F2' || (e.shiftKey && e.code == 'KeyJ')) {
+      if (e.code == 'F2' || (false && e.shiftKey && e.code == 'KeyJ')) {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueStartTimeToRight(0.1)
         // if (cue) {
@@ -138,7 +138,7 @@ export class EditorView extends LitElement {
         // }
         this.playInterval()
       }
-      if (e.code == 'F11' || (e.shiftKey && e.code == 'KeyK')) {
+      if (e.code == 'F11' || (false && e.shiftKey && e.code == 'KeyK')) {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueEndTimeToLeft(0.1)
         if (cue) {
@@ -147,7 +147,7 @@ export class EditorView extends LitElement {
           this.videoElement.playFroTo(endTime - 1, endTime)
         }
       }
-      if (e.code == 'F12' || (e.shiftKey && e.code == 'KeyL')) {
+      if (e.code == 'F12' || (false && e.shiftKey && e.code == 'KeyL')) {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueEndTimeToRight(0.1)
         if (cue) {
