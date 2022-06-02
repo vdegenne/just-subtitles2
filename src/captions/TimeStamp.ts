@@ -1,5 +1,9 @@
 import {ensureZero} from './util'
 
+// export interface TimeStamp {
+
+// }
+
 export class TimeStamp {
   protected static timeSeparator = ':'
   protected static milliSeparator = '.'

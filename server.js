@@ -1,6 +1,7 @@
 import Koa from 'koa'
 import Router from 'koa-router'
 import statics from 'koa-static'
+import mount from 'koa-mount'
 import fs from 'node:fs'
 import koaBody from 'koa-body'
 import path, { extname } from 'node:path'
@@ -16,6 +17,7 @@ app.use(koaBody())
 app.use(mp4Middleware())
 
 app.use(statics('docs'))
+app.use(mount('/src', statics('src')))
 
 router.get('/ping', function (ctx) {
   return ctx.body = 'pong'

@@ -2,15 +2,12 @@ WEBVTT
 
 STYLE
 ::cue {
-background-color:black;
+background-color:red;
 line-height: 100px;
 }
 
 00:00:02.278 --> 00:00:04.678
 Ca c'est "kumo", et ça aussi c'est "kumo"
-
-00:00:04.679 --> 00:00:06.679
-insert text here
 
 00:00:04.881 --> 00:00:09.281
 Celui-ci c'est "kumo" (nuage) qui flotte dans le ciel
@@ -34,9 +31,17 @@ A propos des étudiants internationaux qui étudient ce Japonais si difficile
 00:00:23.386 --> 00:00:24.986
 A ce sujet j'ai voulu en apprendre.
 
+00:00:30.503 --> 00:00:31.903
+Salut
 
+00:00:32.012 --> 00:00:32.965
+Ton nom ?
 
+00:00:33.254 --> 00:00:34.242
+Je m'appelle Joel
 
+00:00:34.341 --> 00:00:37.341
+Joel, tu viens de quel pays ?
 
 
 

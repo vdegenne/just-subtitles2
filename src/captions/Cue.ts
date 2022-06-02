@@ -1,10 +1,18 @@
 import { TimeStamp, VTTTimeStamp } from './TimeStamp';
 import { distributeLanguages } from './util'
 
-export class Cue {
+export interface Cue {
+  source: string[];
+  startTime: TimeStamp;
+  endTime: TimeStamp|null;
+  toString(langs: string[]): string;
+}
+
+export class CueBase implements Cue {
+  source!: string[];
   protected cueName?: string;
-  public startTime!: TimeStamp
-  public endTime!: TimeStamp|null
+  startTime!: TimeStamp
+  endTime!: TimeStamp|null
   protected langs?: 'all'|string[]
   protected text?: {}|undefined;
 
@@ -42,11 +50,14 @@ export class Cue {
       }
     }
   }
+
+
+  set (milliseconds: number) {}
 }
 
-export class VTTCue extends Cue {
-  public startTime!: VTTTimeStamp
-  public endTime!: VTTTimeStamp|null
+export class VTTCue extends CueBase {
+  startTime!: VTTTimeStamp
+  endTime!: VTTTimeStamp|null
   static timeCodeRegexp = /(?<start>\d{1,2}:\d{2}:\d{2}\.\d{3}) --> ((?<end>\d{1,2}:\d{2}:\d{2}\.\d{3})( (?<meta>.+))?)?/
   static separator = ' --> '
   protected meta: string;
@@ -55,6 +66,7 @@ export class VTTCue extends Cue {
     super()
 
     let lines: string[] = (typeof input === 'string') ? input.split(/\n/g) : input;
+    this.source = lines
 
     if (lines[0].match(VTTCue.timeCodeRegexp) == null) {
       this.cueName = lines.shift()

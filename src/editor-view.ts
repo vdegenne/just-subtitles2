@@ -57,6 +57,9 @@ export class EditorView extends LitElement {
     this.textareaElement.textarea.addEventListener('keydown', e => {
       // console.log(e.code)
 
+      if (e.altKey && e.code == 'KeyU') {
+        this.textareaElement.goToLine(16)
+      }
       // if (e.code == 'Escape') {
       //   preventAll(e)
       //   this.videoElement.togglePlay()
@@ -86,8 +89,18 @@ export class EditorView extends LitElement {
         }
       }
 
+      /** VIDEO NAVIGATION */
+      if (e.code == 'Numpad4') {
+        preventAll(e)
+        this.videoElement.stepBack(0.1)
+      }
+      if (e.code == 'Numpad6') {
+        preventAll(e)
+        this.videoElement.stepForward(0.1)
+      }
 
 
+      /** ???????? */
       if (e.altKey && e.code == 'Digit0') {
         preventAll(e)
         // reach the video to startTime of current cue
@@ -108,7 +121,7 @@ export class EditorView extends LitElement {
 
       if ((e.shiftKey && (e.code == 'KeyI' || e.code == 'Enter')) || (e.altKey && e.code == 'Enter')) {
         const currentTime = this.videoElement.currentTime
-        this.textareaElement.insertNewCue(currentTime, currentTime + 2)
+        this.textareaElement.insertNewCue(currentTime, currentTime + 3)
       }
 
 
@@ -116,42 +129,33 @@ export class EditorView extends LitElement {
         preventAll(e)
         this.playInterval()
       }
-      if (e.code == 'F1' || (false && e.shiftKey && e.code == 'KeyH')) {
+
+      /** STRETCHING TIME */
+      if (e.code == 'F1') {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueStartTimeToLeft(0.1)
-        // if (cue) {
-        //   // this.videoElement.cancelPlayFroTo()
-        //   const startTime = cue.startTime.toSeconds()
-        //   const endTime = cue.endTime!.toSeconds()
-        //   this.videoElement.playFroTo(startTime, endTime) //cue.endTime!.toSeconds())
-        // }
         this.playInterval()
       }
-      if (e.code == 'F2' || (false && e.shiftKey && e.code == 'KeyJ')) {
+      if (e.code == 'F2') {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueStartTimeToRight(0.1)
-        // if (cue) {
-        //   // this.videoElement.cancelPlayFroTo()
-        //   const startTime = cue.startTime.toSeconds()
-        //   const endTime = cue.endTime!.toSeconds()
-        //   this.videoElement.playFroTo(startTime, endTime) //cue.endTime!.toSeconds())
-        // }
         this.playInterval()
       }
-      if (e.code == 'F11' || (false && e.shiftKey && e.code == 'KeyK')) {
+      if (!e.altKey && e.code == 'F11') {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueEndTimeToLeft(0.1)
         if (cue) {
-          // this.videoElement.cancelPlayFroTo()
           const endTime = cue.endTime!.toSeconds()
           this.videoElement.playFroTo(endTime - 1, endTime)
         }
       }
-      if (e.code == 'F12' || (false && e.shiftKey && e.code == 'KeyL')) {
+      if (e.altKey && e.code == 'F12') {
+        this.textareaElement.setCurrentCueEndTime(this.videoElement.currentTime)
+      }
+      if (!e.altKey && e.code == 'F12') {
         preventAll(e)
         const cue = this.textareaElement.moveCurrentCueEndTimeToRight(0.1)
         if (cue) {
-          // this.videoElement.cancelPlayFroTo()
           const endTime = cue.endTime!.toSeconds()
           this.videoElement.playFroTo(endTime - 1, endTime)
         }

@@ -1,16 +1,19 @@
 import { VTTTrack } from './Track';
-import { VTTCue, Cue } from './Cue'
+import { Cue, VTTCue } from './Cue'
 import { TimeStamp } from './TimeStamp'
+import { Block, CueBlock, HeaderBlock, isCue, isLine, LineBlock, NoteBlock, StyleBlock, UndefinedBlock } from './Block';
 
-export type Block = {
-  type: 'header'|'cue'|'line'|'style'|'note'|'other';
-  block: string[]|VTTCue;
+
+export interface CaptionsSuperStructure {
+  blocks: Block[];
+  processBlocks(lines: string[], langs: string[]): void;
+  getBlockIndex (block: Block): number;
 }
 
-export class CaptionsSuperStructure {
+export class CaptionsSuperStructureBase implements CaptionsSuperStructure {
   protected source: string
   protected langs: 'any'|string[]
-  protected blocks: Block[] = []
+  blocks: Block[] = []
   protected styles: string[][] = []
   public cues: VTTTrack = new VTTTrack()
 
@@ -36,9 +39,9 @@ export class CaptionsSuperStructure {
 
   findCueBlockWithTime (startTime: TimeStamp, endTime: TimeStamp) {
     return this.blocks.find(b => {
-      return b.type === 'cue'
-        && (b.block as Cue).startTime.equals(startTime)
-        && ((b.block as Cue).endTime != null && (b.block as Cue).endTime!.equals(endTime))
+      return isCue(b)
+        && (b as CueBlock).cue.startTime.equals(startTime)
+        && ((b as CueBlock).cue.endTime != null && (b as CueBlock).cue.endTime!.equals(endTime))
     })
   }
 
@@ -46,23 +49,25 @@ export class CaptionsSuperStructure {
     return this.blocks.indexOf(block)
   }
   getBlockIndexFromCue (cue: Cue) {
-    return this.blocks.findIndex(b=>b.block==cue)
+    return this.blocks.findIndex(b=>isCue(b) && (b as CueBlock).cue==cue)
   }
 
   insertBlock (index: number, block: Block, spaceAround = true) {
     this.blocks.splice(index, 0, block)
-    if (block.type != 'line' && this.blocks[index - 1].type != 'line') {
+    if (!isLine(block) && !isLine(this.blocks[index - 1])) {
       // add a line between
-      this.blocks.splice(index, 0, { type: 'line', block: [] })
+      this.blocks.splice(index, 0, new LineBlock(this, []))
     }
     this.updateCueList()
   }
 
+  getBlockLine () {}
+
   updateCueList () {
     this.cues = new VTTTrack();
     for (const block of this.blocks) {
-      if (block.type == 'cue') {
-        this.cues.push(block.block)
+      if (isCue(block)) {
+        this.cues.push((block as CueBlock).cue)
       }
     }
   }
@@ -70,14 +75,14 @@ export class CaptionsSuperStructure {
   toString(langs = ['any']) {
     return this.blocks
             .map((b,i) => {
-              if (b.type == 'cue') {
-                return `${b.block.toString(langs)}${i==this.blocks.length - 1 ? '' : '\n'}`
+              if (isCue(b)) {
+                return `${(b as CueBlock).cue.toString(langs)}${i==this.blocks.length - 1 ? '' : '\n'}`
               }
-              else if (b.type == 'line') {
+              else if (isLine(b)) {
                 return `${i!=this.blocks.length - 1 ? '\n' : ''}`
               }
               else {
-                return `${(b.block as string[]).join('\n')}${i==this.blocks.length - 1 ? '' : '\n'}`
+                return `${(b.content).join('\n')}${i==this.blocks.length - 1 ? '' : '\n'}`
               }
             })
             .join('')
@@ -89,9 +94,9 @@ export class CaptionsSuperStructure {
 }
 
 /**
- * VTTTextTrack
+ *
  */
-export class VTTCaptionsSuperStructure extends CaptionsSuperStructure {
+export class VTTCaptionsSuperStructure extends CaptionsSuperStructureBase implements CaptionsSuperStructure {
   override processBlocks(lines: string[], langs: string[]) {
     this.blocks = []
     this.styles = []
@@ -106,38 +111,42 @@ export class VTTCaptionsSuperStructure extends CaptionsSuperStructure {
 
       /* EMPTY LINE */
       if (lines[0].match(/^\s*$/)) {
-        this.blocks.push({
-          type: 'line',
-          block: [lines.shift()!]
-        })
+        this.blocks.push(new LineBlock(this, [lines.shift()]))
+        // this.blocks.push({
+        //   type: 'line',
+        //   block: [lines.shift()!]
+        // })
         continue
       }
 
       /* HEADER */
       if (lines[0].startsWith('WEBVTT')) {
-        this.blocks.push({
-          type: 'header',
-          block: [lines.shift()!]
-        })
+        this.blocks.push(new HeaderBlock(this, [lines.shift()]))
+        // this.blocks.push({
+        //   type: 'header',
+        //   block: [lines.shift()!]
+        // })
         continue
       }
 
       /* NOTE */
       if (lines[0].startsWith('NOTE')) {
-        this.blocks.push({
-          type: 'note',
-          block: lines.splice(0, getEndOfBlockIndex(lines))
-        })
+        this.blocks.push(new NoteBlock(this, lines.splice(0, getEndOfBlockIndex(lines))))
+        // this.blocks.push({
+        //   type: 'note',
+        //   block: lines.splice(0, getEndOfBlockIndex(lines))
+        // })
         continue
       }
 
       /* STYLE */
       if (lines[0] === 'STYLE') {
+        this.blocks.push(new StyleBlock(this, lines.splice(0, getEndOfBlockIndex(lines))))
         /* should use the styles array ? */
-        this.blocks.push({
-          type: 'style',
-          block: lines.splice(0, getEndOfBlockIndex(lines))
-        })
+        // this.blocks.push({
+        //   type: 'style',
+        //   block: lines.splice(0, getEndOfBlockIndex(lines))
+        // })
         // this.styles.push(line)
         continue
       }
@@ -145,19 +154,21 @@ export class VTTCaptionsSuperStructure extends CaptionsSuperStructure {
       /* CUE */
       if (lines[0].match(VTTCue.timeCodeRegexp) || (lines[1] && lines[1].match(VTTCue.timeCodeRegexp))) {
         const cue = new VTTCue(lines.splice(0, getEndOfBlockIndex(lines)), langs)
-        this.blocks.push({
-          type: 'cue',
-          block: cue
-        })
+        this.blocks.push(new CueBlock(this, cue))
+        // this.blocks.push({
+        //   type: 'cue',
+        //   block: cue
+        // })
         // this.cues.push(cue)
         continue
       }
 
       /* OTHER */
-      this.blocks.push({
-        type: 'other',
-        block: lines.splice(0, getEndOfBlockIndex(lines))
-      })
+      this.blocks.push(new UndefinedBlock(this, lines.splice(0, getEndOfBlockIndex(lines))))
+      // this.blocks.push({
+      //   type: 'other',
+      //   block: lines.splice(0, getEndOfBlockIndex(lines))
+      // })
     }
 
     this.updateCueList()

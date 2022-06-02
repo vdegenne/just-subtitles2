@@ -2,16 +2,17 @@ import { css, html, LitElement, PropertyValueMap } from 'lit'
 import { customElement, query, state } from 'lit/decorators.js'
 import '@material/mwc-dialog'
 import '@material/mwc-icon-button'
-import { VTTTimeStamp } from './captions/TimeStamp'
+import { VTTTimeStamp, TimeStamp } from './captions/TimeStamp'
 import { VTTCaptionsSuperStructure } from './captions/CaptionsSuperStructure';
-import { Cue, VTTCue } from './captions/Cue'
+import { VTTCue } from './captions/Cue'
 import { VTTTimeCode } from './captions/TimeCode'
+import { CueBlock } from './captions/Block'
 
 @customElement('textarea-element')
 export class TextareaElement extends LitElement {
   @state() captions!: string;
   private _lastCaptions: string = ''
-  private VTTRepresentation!: VTTCaptionsSuperStructure;
+  private vtt!: VTTCaptionsSuperStructure;
 
   @query('#textarea') textarea!: HTMLTextAreaElement;
 
@@ -56,22 +57,17 @@ export class TextareaElement extends LitElement {
     const selectionStart = this.textarea.selectionStart
     const cue = new VTTCue([
       [new VTTTimeStamp(startTime), VTTCue.separator, new VTTTimeStamp(endTime)].join(''),
-      'insert text here'
+      ''
     ])
-    const currentCueIndex = this.getCurrentCueIndex()
-    if (currentCueIndex >= 0) {
-      const currentCue = this.VTTRepresentation.cues[currentCueIndex]
-      const index = this.VTTRepresentation.getBlockIndexFromCue(currentCue)
-      this.VTTRepresentation.insertBlock(index + 1, {
-        type: 'cue',
-        block: cue
-      })
+    const currentCue = this.getCurrentCue()
+    const newCue = new CueBlock(this.vtt, cue)
+    if (currentCue) {
+      // const currentCue = this.vtt.cues[currentCue]
+      const index = this.vtt.getBlockIndexFromCue(currentCue)
+      this.vtt.insertBlock(index + 1, newCue)
     }
     else {
-      this.VTTRepresentation.insertBlock(this.VTTRepresentation.blockSize, {
-        type: 'cue',
-        block: cue
-      })
+      this.vtt.insertBlock(this.vtt.blockSize, newCue)
     }
     // const timecode = this.getCurrentTimeCode()
     // if (timecode) {
@@ -85,18 +81,23 @@ export class TextareaElement extends LitElement {
     //   // return
     // }
     this.updateTextAreaFromRepresentation()
-    this.textarea.selectionStart = selectionStart
-    this.textarea.selectionEnd = selectionStart
+    this.setCaretPosition(selectionStart)
+    this.goToLine(newCue.line + 1)
   }
 
   moveCurrentCueStartTimeToLeft (seconds: number) {
     const selectionStart = this.textarea.selectionStart
-    const currentCue = this.getCurrentCue()
-    currentCue?.startTime.substract(seconds * 1000)
-    this.updateTextAreaFromRepresentation()
-    // console.log(currentCue)
-    this.setCaretPosition(selectionStart)
-    return currentCue
+    const cue = this.getCurrentCue()
+    if (cue) {
+      cue.startTime.substract(seconds * 1000)
+      this.updateTextAreaFromRepresentation()
+      // console.log(currentCue)
+      this.setCaretPosition(selectionStart)
+      return cue
+    }
+    else {
+      return null;
+    }
   }
   moveCurrentCueStartTimeToRight (seconds: number) {
     const selectionStart = this.textarea.selectionStart
@@ -125,6 +126,13 @@ export class TextareaElement extends LitElement {
     this.setCaretPosition(selectionStart)
     return currentCue
   }
+  setCurrentCueEndTime(currentTime: number) {
+    const cue = this.getCurrentCue()
+    if (cue && cue.endTime) {
+      cue.endTime = new TimeStamp(currentTime)
+    }
+    this.updateTextAreaFromRepresentation()
+  }
 
   /**
    * @returns The current timecode (before the caret) or null if no time were found
@@ -134,7 +142,7 @@ export class TextareaElement extends LitElement {
     const matches = beforeText.match(new RegExp(VTTCue.timeCodeRegexp, 'g'))
     const cueIndex = this.getCurrentCueIndex()
     if (cueIndex >= 0) {
-      const cue = this.VTTRepresentation.cues[cueIndex] as VTTCue
+      const cue = this.vtt.cues[cueIndex] as VTTCue
       return new VTTTimeCode(cue.startTime, cue.endTime!)
     }
     // if (matches?.length) {
@@ -151,24 +159,30 @@ export class TextareaElement extends LitElement {
   getCurrentCue () {
     const currentCueIndex = this.getCurrentCueIndex()
     if (currentCueIndex == -1) { return null }
-    const cue = this.VTTRepresentation.cues[currentCueIndex] as VTTCue
+    const cue = this.vtt.cues[currentCueIndex] as VTTCue
     if (cue == null) { return null }
     return cue
   }
 
   updateVTTRepresentation (input: string = this.captions) {
-    this.VTTRepresentation = new VTTCaptionsSuperStructure(input)
+    this.vtt = new VTTCaptionsSuperStructure(input)
   }
 
   updateTextAreaFromRepresentation () {
-    this.textarea.value = this.VTTRepresentation.toString()
+    this.textarea.value = this.vtt.toString()
     // @ts-ignore
-    console.log(this.VTTRepresentation.blocks, this.VTTRepresentation.toString())
+    console.log(this.vtt.blocks, this.vtt.toString())
   }
 
   setCaretPosition (caretPosition: number) {
     this.textarea.selectionStart = caretPosition
     this.textarea.selectionEnd = caretPosition
+  }
+
+  goToLine (line: number) {
+    let lines = this.textarea.value.split(/\n/)
+    lines = lines.slice(0, line - 1)
+    this.setCaretPosition(lines.join(' ').length + 1)
   }
 
   async loadCaptions () {
@@ -181,7 +195,6 @@ export class TextareaElement extends LitElement {
       body: this.textarea.value
     })
   }
-
 
   protected createRenderRoot(): Element | ShadowRoot {
     return this
