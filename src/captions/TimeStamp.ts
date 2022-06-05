@@ -36,11 +36,11 @@ export class TimeStamp {
       const parts = input.split('.')
       this.seconds = parseInt(parts[0])
       this.milliseconds = parts[1] ? parseInt(parts[1].substring(0, 3)) : 0
-      if (this.seconds / 60 > 1) {
+      if (this.seconds / 60 >= 1) {
         this.minutes = Math.floor(this.seconds / 60)
         this.seconds -= this.minutes * 60
 
-        if (this.minutes / 60 > 1) {
+        if (this.minutes / 60 >= 1) {
           this.hours = Math.floor(this.minutes / 60)
           this.minutes -= this.hours * 60
         }

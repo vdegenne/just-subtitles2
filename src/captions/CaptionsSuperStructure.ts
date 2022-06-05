@@ -37,12 +37,16 @@ export class CaptionsSuperStructureBase implements CaptionsSuperStructure {
   //   // return this.blocks.filter(b => b.type === 'cue').map(b => b.block)
   // }
 
-  findCueBlockWithTime (startTime: TimeStamp, endTime: TimeStamp) {
+  getCueBlockFromInterval (startTime: TimeStamp, endTime: TimeStamp) {
     return this.blocks.find(b => {
       return isCue(b)
         && (b as CueBlock).cue.startTime.equals(startTime)
         && ((b as CueBlock).cue.endTime != null && (b as CueBlock).cue.endTime!.equals(endTime))
     })
+  }
+
+  getCueBlockFromIndex (index: number) {
+    return this.blocks.filter(b=>isCue(b))[index]
   }
 
   getBlockIndex(block:Block) {
@@ -56,12 +60,10 @@ export class CaptionsSuperStructureBase implements CaptionsSuperStructure {
     this.blocks.splice(index, 0, block)
     if (!isLine(block) && !isLine(this.blocks[index - 1])) {
       // add a line between
-      this.blocks.splice(index, 0, new LineBlock(this, []))
+      this.blocks.splice(index, 0, new LineBlock(this, ['']))
     }
     this.updateCueList()
   }
-
-  getBlockLine () {}
 
   updateCueList () {
     this.cues = new VTTTrack();

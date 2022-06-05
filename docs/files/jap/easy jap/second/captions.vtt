@@ -2,7 +2,8 @@ WEBVTT
 
 STYLE
 ::cue {
-background-color:red;
+background-color:yellow;
+color:black;
 line-height: 100px;
 }
 
@@ -42,6 +43,52 @@ Je m'appelle Joel
 
 00:00:34.341 --> 00:00:37.341
 Joel, tu viens de quel pays ?
+
+00:00:37.451 --> 00:00:38.251
+De Finlande
+
+00:00:38.358 --> 00:00:41.958
+De Finlande ! Ca fait combien de temps depuis que tu es arrivé au Japon ?
+
+00:00:42.174 --> 00:00:44.439
+Hmm environ 2 mois
+
+00:00:44.600 --> 00:00:47.811
+Seulement 2 mois ? mais tu parles Japonais non ?
+
+00:00:48.015 --> 00:00:51.015
+Bon, J'ai étudié environ 2 ans en Finlande.
+
+00:00:51.215 --> 00:00:55.635
+Combien de temps as-tu appris le Japonais ? En terme de durée.
+
+00:00:55.735 --> 00:00:60.329
+Euh, pendant 2 ans environ,  J'ai appris le Japonais. Oui.
+
+00:00:59.927 --> 00:01:02.660
+Ton Japonais est vraiment bien !
+
+00:01:02.952 --> 00:01:03.810
+Oui pas mauvais.
+
+00:01:04.079 --> 00:01:05.654
+Combien de temps as-tu étudié ?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

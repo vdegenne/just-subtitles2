@@ -6,6 +6,8 @@ export interface Cue {
   startTime: TimeStamp;
   endTime: TimeStamp|null;
   toString(langs: string[]): string;
+  offset(milliseconds: number);
+  text: {}|undefined;
 }
 
 export class CueBase implements Cue {
@@ -14,7 +16,7 @@ export class CueBase implements Cue {
   startTime!: TimeStamp
   endTime!: TimeStamp|null
   protected langs?: 'all'|string[]
-  protected text?: {}|undefined;
+  text: {}|undefined;
 
   // constructor(raw) {
   //   this.raw = raw
@@ -37,7 +39,7 @@ export class CueBase implements Cue {
     return ' --> '
   } */
 
-  public offset(milliseconds: number) {
+  offset(milliseconds: number) {
     if (milliseconds < 0) {
       this.startTime.substract(Math.abs(milliseconds))
       if (this.endTime) {

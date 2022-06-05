@@ -43,14 +43,25 @@ export class VideoElement extends LitElement {
 
   togglePlay() {
     if (this.playing == false) {
-      this.videoElement.play()
-      this.playing = true
+      this.play()
+      // this.videoElement.play()
+      // this.playing = true
     }
     else {
-      this.videoElement.pause()
-      this.playing = false
+      this.pause()
+      // this.videoElement.pause()
+      // this.playing = false
     }
   }
+  play() {
+    this.videoElement.play()
+    this.playing = true
+  }
+  stop() {
+    this.videoElement.pause()
+    this.playing = false
+  }
+  pause() { this.stop() }
 
 
   loadVideo (source: string) {
@@ -69,6 +80,13 @@ export class VideoElement extends LitElement {
     this.videoElement.currentTime = this.videoElement.currentTime + seconds
   }
 
+  speedDown() {
+    this.videoElement.playbackRate = this.videoElement.playbackRate - 0.25
+  }
+  speedUp() {
+    this.videoElement.playbackRate = this.videoElement.playbackRate + 0.25
+  }
+
 
   private _seekForEndInterval?: NodeJS.Timer
   private _seekForEndResolve?: (value: unknown) => void
@@ -81,7 +99,7 @@ export class VideoElement extends LitElement {
     this._seekForEndResolve = undefined
     this._seekForEndReject = undefined
   }
-  playFroTo (fro: number, to: number) {
+  playFroTo (fro: number, to: number, resetOnEnd = false) {
     this.clearPlayFroTo()
     this.videoElement.currentTime = fro
     new Promise((resolve, reject) => {
@@ -96,7 +114,11 @@ export class VideoElement extends LitElement {
       if (this.playing) {
         if (this.videoElement.currentTime >= to) {
           if (this._seekForEndResolve) {
-            this.togglePlay()
+            // this.togglePlay()
+            this.stop()
+            if (resetOnEnd) {
+              this.videoElement.currentTime = fro
+            }
             console.log(`stopped at ${this.videoElement.currentTime}`)
             this._seekForEndResolve!(null)
           }

@@ -1,4 +1,6 @@
-export class Track extends Array {
+import { Cue } from './Cue'
+
+export class Track extends Array<Cue> {
   nextOf(caption) {
     return this[this.indexOf(caption) + 1]
   }

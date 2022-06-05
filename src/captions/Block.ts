@@ -3,7 +3,8 @@ import { Cue } from './Cue'
 
 export interface Block {
   content: string[]
-  get height (): number|undefined;
+  get height (): number;
+  get line (): number;
 }
 
 export class BlockBase implements Block {
@@ -20,8 +21,9 @@ export class BlockBase implements Block {
   }
 
   get line () {
-    const previousBlocks = this.context.blocks.slice(0, this.context.getBlockIndex(this) + 1)
-    return previousBlocks.reduce((acc, block) => acc + (block.height || 0), 0)
+    const previousBlocks = this.context.blocks.slice(0, this.context.getBlockIndex(this))
+    const height = previousBlocks.reduce((acc, block) => acc + (block.height || 0), 0)
+    return height + 1
   }
 }
 
