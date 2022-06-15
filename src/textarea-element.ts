@@ -8,7 +8,6 @@ import { VTTCaptionsSuperStructure } from './captions/CaptionsSuperStructure';
 import { Cue, VTTCue } from './captions/Cue'
 import { VTTTimeCode } from './captions/TimeCode'
 import { CueBlock } from './captions/Block'
-import { sleep } from './util';
 
 
 @customElement('textarea-element')
@@ -33,7 +32,7 @@ export class TextareaElement extends LitElement {
     return html`
     ${until(this.cueStripTemplate())}
     <textarea id=textarea
-      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:roboto;border:none;outline:none;caret-color:red"
+      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:roboto;border:none;outline:none;caret-color:red;padding-left:12px"
       @keyup=${()=>{this.onTextareaKeyup()}}>${this.captions}</textarea>
     `
   }
@@ -42,13 +41,12 @@ export class TextareaElement extends LitElement {
     await this.updateComplete
     if (!cue) {
       cue = this.getCurrentCue()
-      console.log(cue)
       if (!cue) return nothing
     }
     const startTimeFormatted = cue.startTime
     const endTimeFormatted = cue.endTime
     return html`
-    <div style="background-color:#616161;color:#9e9e9e;font-size:0.9em;padding:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+    <div style="background-color:#616161;color:white;font-size:0.9em;padding:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       <span>${startTimeFormatted} --> ${endTimeFormatted} : ${cue.text!['any']}</span>
     </div>
     `
@@ -84,6 +82,7 @@ export class TextareaElement extends LitElement {
       [new VTTTimeStamp(startTime), VTTCue.separator, new VTTTimeStamp(endTime)].join(''),
       ''
     ])
+    console.log(cue)
     const currentCue = this.getCurrentCue()
     const newCue = new CueBlock(this.vtt, cue)
     if (currentCue) {
@@ -229,6 +228,14 @@ export class TextareaElement extends LitElement {
         this.updateCueStrip()
       }
     // }
+  }
+  moveCaretToLastCue() {
+    const cues = this.vtt.getCueBlocks()
+    if (cues.length > 0) {
+      this.goToLine(cues[cues.length - 1].line + 1)
+      this.focusToCaret()
+      this.updateCueStrip()
+    }
   }
 
   focusToCaret() {

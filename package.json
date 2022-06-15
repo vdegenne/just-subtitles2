@@ -28,7 +28,7 @@
     "watch": "rollup -cw",
     "watch:server": "pm2 start pm2.config.js",
     "browser-sync:static": "browser-sync docs --files docs/app.js --no-notify",
-    "browser-sync": "browser-sync start --proxy http://localhost:33771/ --files docs/app.js --no-notify",
+    "browser-sync": "browser-sync start --proxy http://localhost:33771/ --files docs/app.js server.js --no-notify",
     "deploy": "git add . && git commit -m \"$(./fruit.js)\" && git push",
     "buildeploy": "npm run build && npm run deploy"
   },
@@ -39,6 +39,7 @@
     "koa-mount": "^4.0.0",
     "koa-router": "^10.1.1",
     "koa-static": "^5.0.0",
+    "open": "^8.4.0",
     "youtube-dl-wrap": "^2.1.1"
   }
 }

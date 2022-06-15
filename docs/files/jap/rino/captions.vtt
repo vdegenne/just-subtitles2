@@ -1,5 +1,10 @@
 WEBVTT
 
+STYLE
+::cue {
+// background-color:red;
+}
+
 00:00:05.000 --> 00:00:11.796
 sans rouille, un voyage sans fin, l'enfant qui erre, bercé par les gallots du cheval
 
@@ -21,9 +26,28 @@ coups après coups de pinceau tu redéfinis la carte, je n'ai pas le temps pour 
 00:00:36.940 --> 00:00:41.702
 Bastos ! Ère Heisei, Survivre repose sur tes bras.
 
-00:00:41.926 --> 00:00:46.921
+00:00:41.926 --> 00:00:46.120
 Etoile du matin, Etoile du soir, balles perdues échangées dans les zones sauvages
 
 00:00:46.925 --> 00:00:51.990
+un demon ou un serpent, tout ou rien, c'est Jah qui joue les cartes
+
+00:00:52.091 --> 00:00:57.591
+木枯らし吹く未開の地 開けてビックリ 唐辛子よりも辛口な旅路
+
+00:00:57.692 --> 00:01:01.992
+それが意外にシックリくるかもじっくり見渡す
+Prévois ses conséquences inattendues minutieusement
+
+00:01:02.092 --> 00:01:06.993 line:5
+インチキ霊感商法入る隙無し 過酷さ 生存競走暇なし
+
+00:01:06.995 --> 00:01:09.995
+四方で八方塞がり 中途半端に啖呵切る小姑みたいな野郎は即絞首刑
+
+
+
+
+
 
 

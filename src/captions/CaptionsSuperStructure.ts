@@ -93,6 +93,11 @@ export class CaptionsSuperStructureBase implements CaptionsSuperStructure {
   get blockSize () {
     return this.blocks.length
   }
+
+
+  getCueBlocks () {
+    return this.blocks.filter(block => isCue(block))
+  }
 }
 
 /**

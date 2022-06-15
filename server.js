@@ -5,7 +5,8 @@ import mount from 'koa-mount'
 import fs from 'node:fs'
 import koaBody from 'koa-body'
 import path, { extname } from 'node:path'
-import { localURI, projectExists } from './util.js'
+import open from 'open'
+import { getTree, localURI, projectExists } from './util.js'
 import {promisify} from 'util'
 const glob = promisify((await import('glob')).default)
 
@@ -58,6 +59,9 @@ router.get('/api/get-captions', async ctx => {
   }
 })
 
+router.get('/api/get-tree', async ctx => {
+  return ctx.body = getTree(`docs${path.sep}files`)
+})
 
 app.use(router.routes()).use(router.allowedMethods())
 
@@ -72,6 +76,10 @@ app.use(async ctx => {
 
 app.listen(port, function () {
   console.log(`http://localhost:${port}/`)
+  const env = process.env.ENV
+  if (env && env.toLocaleLowerCase() == 'prod') {
+    open(`http://localhost:${port}/`)
+  }
 })
 
 

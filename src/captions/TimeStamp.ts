@@ -30,12 +30,12 @@ export class TimeStamp {
       }
     }
     else if (typeof input == 'number') {
-      input = ''+input
       this.hours = 0
       this.minutes = 0
+      input = ''+input
       const parts = input.split('.')
       this.seconds = parseInt(parts[0])
-      this.milliseconds = parts[1] ? parseInt(parts[1].substring(0, 3)) : 0
+      this.milliseconds = Math.trunc(parseFloat('0.' + (parts[1] || 0)) * 1000)
       if (this.seconds / 60 >= 1) {
         this.minutes = Math.floor(this.seconds / 60)
         this.seconds -= this.minutes * 60

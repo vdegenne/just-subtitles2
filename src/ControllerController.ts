@@ -49,8 +49,17 @@ export class ControllerController {
       .before('button3', ()=>this.editor.insertNewCue())
 
       .before('button12', ()=>this.editor.previousCue())
-      .before('button13', ()=>this.editor.nextCue())
-      .before('button7', ()=>this.editor.playInterval(false))
+      .before('button13', ()=>{
+        if (this.secondary) {
+          this.editor.lastCue();
+        }
+        else {
+          this.editor.nextCue()
+        }
+      })
+      .before('button7', ()=>{
+        this.editor.togglePlayInterval()
+      })
 
       .before('button4', ()=>{
         if (this.secondary) {

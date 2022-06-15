@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs, { statSync } from 'fs';
+import path, { join as pathJoin } from 'path';
 
 export function localURI (pathname) {
   return `./docs/${pathname}`
@@ -36,3 +37,30 @@ export function writeFileStream(ctx, start, end, filePath, stat) {
     }
   })
 }
+
+const sep = path.sep
+export function getTree (path) {
+  if (isProjectDirectory(path)) {
+    return {
+      type: 'project',
+      path: path.split(sep).slice(1).join(sep).replace(/\\/g, '/'),
+    }
+  }
+  else if (isPathDirectory(path)) {
+    return {
+      type: 'directory',
+      path: path.split(sep).slice(1).join(sep).replace(/\\/g, '/'),
+      child: getPathDirectories(path).map(directory => getTree(pathJoin(path, directory)))
+    }
+  }
+}
+export function getPathDirectories (path) {
+  return fs.readdirSync(path).filter(file => {
+    const stat = fs.statSync(pathJoin(path, file));
+    return stat.isDirectory()
+  })
+}
+export function isPathDirectory (path) {
+  return !fs.existsSync(pathJoin(path, 'meta.json'))
+}
+export function isProjectDirectory (path) { return !isPathDirectory(path) }

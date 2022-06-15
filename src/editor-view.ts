@@ -156,7 +156,7 @@ export class EditorView extends LitElement {
   }
 
   insertNewCue() {
-    const currentTime = this.videoElement.currentTime
+    const currentTime = this.videoElement.currentTime + 0.001
     this.textareaElement.insertNewCue(currentTime, currentTime + 3)
   }
 
@@ -207,6 +207,8 @@ export class EditorView extends LitElement {
 
   previousCue () { this.textareaElement.moveCaretToPreviousCue() }
   nextCue () { this.textareaElement.moveCaretToNextCue() }
+  lastCue () { this.textareaElement.moveCaretToLastCue() }
+
 
   playInterval(resetOnEnd = false) {
     const cue = this.textareaElement.getCurrentCue()
@@ -215,6 +217,15 @@ export class EditorView extends LitElement {
       const startTime = cue.startTime.toSeconds()
       const endTime = cue.endTime!.toSeconds()
       this.videoElement.playFroTo(startTime, endTime, resetOnEnd) //cue.endTime!.toSeconds())
+    }
+  }
+  togglePlayInterval () {
+    if (this.videoElement.playing) {
+      // this.videoElement.clearPlayFroTo()
+      this.videoElement.pause()
+    }
+    else {
+      this.playInterval(false)
     }
   }
 
