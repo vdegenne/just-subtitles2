@@ -30,7 +30,7 @@ export class TextareaElement extends LitElement {
 
   render() {
     return html`
-    ${until(this.cueStripTemplate())}
+    <!-- ${until(this.cueStripTemplate())} -->
     <textarea id=textarea
       style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:'Fira Code';border:none;outline:none;caret-color:red;padding-left:12px"
       @keyup=${()=>{this.onTextareaKeyup()}}>${this.captions}</textarea>

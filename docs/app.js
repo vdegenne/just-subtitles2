@@ -6000,7 +6000,7 @@ let TextareaElement = class TextareaElement extends s$1 {
     }
     render() {
         return $ `
-    ${c(this.cueStripTemplate())}
+    <!-- ${c(this.cueStripTemplate())} -->
     <textarea id=textarea
       style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:'Fira Code';border:none;outline:none;caret-color:red;padding-left:12px"
       @keyup=${() => { this.onTextareaKeyup(); }}>${this.captions}</textarea>
