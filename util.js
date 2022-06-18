@@ -76,3 +76,8 @@ export async function createDirectory (path) {
   }
   await mkdir(path, { recursive: true })
 }
+
+
+export async function getMetaData (projectLocationWithDocs) {
+  return JSON.parse(await fs.promises.readFile(path.join(projectLocationWithDocs, 'meta.json')))
+}
