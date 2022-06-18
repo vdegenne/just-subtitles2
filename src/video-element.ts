@@ -102,7 +102,7 @@ export class VideoElement extends LitElement {
   playFroTo (fro: number, to: number, resetOnEnd = false) {
     this.clearPlayFroTo()
     this.videoElement.currentTime = fro
-    new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       this._seekForEndResolve = resolve
       this._seekForEndReject = reject
     })
@@ -126,6 +126,8 @@ export class VideoElement extends LitElement {
         }
       }
     }, 10)
+
+    return promise
   }
   cancelPlayFroTo () {
     if (this._seekForEndReject) {

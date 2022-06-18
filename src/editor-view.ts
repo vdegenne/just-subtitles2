@@ -209,25 +209,33 @@ export class EditorView extends LitElement {
   nextCue () { this.textareaElement.moveCaretToNextCue() }
   lastCue () { this.textareaElement.moveCaretToLastCue() }
 
+  togglePlay () {
+    this.videoElement.cancelPlayFroTo()
+    this.videoElement.togglePlay()
+  }
 
-  playInterval(resetOnEnd = false) {
+  async playInterval(resetOnEnd = false) {
     const cue = this.textareaElement.getCurrentCue()
     if (cue) {
       // this.videoElement.cancelPlayFroTo()
       const startTime = cue.startTime.toSeconds()
       const endTime = cue.endTime!.toSeconds()
-      this.videoElement.playFroTo(startTime, endTime, resetOnEnd) //cue.endTime!.toSeconds())
+      try {
+        await this.videoElement.playFroTo(startTime, endTime, resetOnEnd) //cue.endTime!.toSeconds())
+      } catch (e) {
+        // on cancel, nothing
+      }
     }
   }
-  togglePlayInterval () {
-    if (this.videoElement.playing) {
-      // this.videoElement.clearPlayFroTo()
-      this.videoElement.pause()
-    }
-    else {
-      this.playInterval(false)
-    }
-  }
+  // togglePlayInterval () {
+  //   if (this.videoElement.playing) {
+  //     // this.videoElement.clearPlayFroTo()
+  //     this.videoElement.pause()
+  //   }
+  //   else {
+  //     this.playInterval(false)
+  //   }
+  // }
 
   protected createRenderRoot(): Element | ShadowRoot {
     return this;

@@ -20,7 +20,9 @@ export class ControllerController {
     this.editor = appInstance;
     gameControl.on('connect', gamepad=>{
       gamepad
-      .before('button0', ()=>this.editor.videoElement.togglePlay())
+      .before('button0', ()=>{
+        this.editor.togglePlay()
+      })
       // <-----
       .before('button14', ()=>{
         this.leftArrowPressed = true
@@ -58,7 +60,8 @@ export class ControllerController {
         }
       })
       .before('button7', ()=>{
-        this.editor.togglePlayInterval()
+        this.editor.playInterval(false)
+        // this.editor.togglePlayInterval()
       })
 
       .before('button4', ()=>{

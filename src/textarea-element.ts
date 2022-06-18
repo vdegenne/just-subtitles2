@@ -24,7 +24,7 @@ export class TextareaElement extends LitElement {
       this.captions = captions
       this._lastCaptions = captions
       this.updateVTTRepresentation()
-      // console.log(this.VTTRepresentation)
+      this.requestUpdate()
     })
   }
 
@@ -32,7 +32,7 @@ export class TextareaElement extends LitElement {
     return html`
     ${until(this.cueStripTemplate())}
     <textarea id=textarea
-      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:roboto;border:none;outline:none;caret-color:red;padding-left:12px"
+      style="width:100%;height:100%;box-sizing:border-box;resize:none;font-family:'Fira Code';border:none;outline:none;caret-color:red;padding-left:12px"
       @keyup=${()=>{this.onTextareaKeyup()}}>${this.captions}</textarea>
     `
   }
@@ -63,7 +63,7 @@ export class TextareaElement extends LitElement {
     this.captions = this.textarea.value
     if (this.textarea.value !== this._lastCaptions) {
       await this.saveCaptions()
-      this.dispatchEvent(new CustomEvent('change'))
+      // this.dispatchEvent(new CustomEvent('change'))
       // this.videoElement.reloadCaptions()
       this._lastCaptions = this.captions
       this.updateVTTRepresentation()
@@ -82,7 +82,7 @@ export class TextareaElement extends LitElement {
       [new VTTTimeStamp(startTime), VTTCue.separator, new VTTTimeStamp(endTime)].join(''),
       ''
     ])
-    console.log(cue)
+    // console.log(cue)
     const currentCue = this.getCurrentCue()
     const newCue = new CueBlock(this.vtt, cue)
     if (currentCue) {
@@ -107,6 +107,9 @@ export class TextareaElement extends LitElement {
     this.updateTextAreaFromRepresentation()
     // this.setCaretPosition(selectionStart)
     this.goToLine(newCue.line + 1)
+    this.focusToCaret()
+
+    this.saveCaptions()
   }
 
   moveCurrentCueStartTimeToLeft (seconds: number) {
@@ -122,6 +125,7 @@ export class TextareaElement extends LitElement {
     else {
       return null;
     }
+    this.saveCaptions()
   }
   moveCurrentCueStartTimeToRight (seconds: number) {
     const selectionStart = this.textarea.selectionStart
@@ -129,6 +133,7 @@ export class TextareaElement extends LitElement {
     currentCue?.startTime.add(seconds * 1000)
     this.updateTextAreaFromRepresentation()
     this.setCaretPosition(selectionStart)
+    this.saveCaptions()
     return currentCue
   }
   moveCurrentCueEndTimeToLeft (seconds: number) {
@@ -137,6 +142,7 @@ export class TextareaElement extends LitElement {
     currentCue.endTime!.substract(seconds * 1000)
     this.updateTextAreaFromRepresentation()
     this.setCaretPosition(selectionStart)
+    this.saveCaptions()
     return currentCue
   }
   moveCurrentCueEndTimeToRight (seconds: number) {
@@ -145,6 +151,7 @@ export class TextareaElement extends LitElement {
     currentCue.endTime!.add(seconds * 1000)
     this.updateTextAreaFromRepresentation()
     this.setCaretPosition(selectionStart)
+    this.saveCaptions()
     return currentCue
   }
   setCurrentCueStartTime(currentTime: number) {
@@ -155,15 +162,17 @@ export class TextareaElement extends LitElement {
     }
     this.updateTextAreaFromRepresentation()
     this.setCaretPosition(selectionStart)
+    this.saveCaptions()
   }
   setCurrentCueEndTime(currentTime: number) {
     const selectionStart = this.textarea.selectionStart
     const cue = this.getCurrentCue()
     if (cue && cue.endTime) {
-      cue.endTime = new TimeStamp(currentTime)
+      cue.endTime = new VTTTimeStamp(currentTime)
     }
     this.updateTextAreaFromRepresentation()
     this.setCaretPosition(selectionStart)
+    this.saveCaptions()
   }
 
   /**
@@ -241,17 +250,18 @@ export class TextareaElement extends LitElement {
   focusToCaret() {
     this.textarea.blur()
     this.textarea.focus()
+    this.textarea.scrollBy(0, 10)
   }
 
   updateVTTRepresentation (input: string = this.captions) {
     this.vtt = new VTTCaptionsSuperStructure(input)
-    this.requestUpdate()
+    // this.requestUpdate()
   }
 
   updateTextAreaFromRepresentation () {
     this.textarea.value = this.vtt.toString()
     // @ts-ignore
-    console.log(this.vtt.blocks, this.vtt.toString())
+    // console.log(this.vtt.blocks, this.vtt.toString())
   }
 
   async loadCaptions () {
@@ -263,6 +273,8 @@ export class TextareaElement extends LitElement {
       method: 'POST',
       body: this.textarea.value
     })
+    // saving the captions, that means a change occured
+    this.dispatchEvent(new CustomEvent('change'))
   }
 
   protected createRenderRoot(): Element | ShadowRoot {
