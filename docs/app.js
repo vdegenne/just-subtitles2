@@ -2655,6 +2655,14 @@ class ControllerController {
                 .before('button0', () => {
                 this.editor.togglePlay();
             })
+                .before('button1', () => {
+                if (!this.editor.videoElement.playing) {
+                    this.editor.togglePlay();
+                }
+                else {
+                    this.editor.videoElement.cancelPlayFroTo();
+                }
+            })
                 // <-----
                 .before('button14', () => {
                 this.leftArrowPressed = true;
@@ -2768,11 +2776,11 @@ let EditorView = class EditorView extends s$1 {
         return $ `
     <style>
         #wrapper {
-          width: 600px;
+          /* width: 600px; */
           display: flex;
-          flex-direction: column;
+          /* flex-direction: column; */
           height: 100vh;
-          margin: 0 auto;
+          /* margin: 0 auto; */
         }
     </style>
     <div id=wrapper>
@@ -5981,6 +5989,7 @@ VTTTimeCode.separator = ' --> ';
 let TextareaElement = class TextareaElement extends s$1 {
     constructor() {
         super();
+        this.captions = 'empty';
         this._lastCaptions = '';
         this.loadCaptions().then(captions => {
             this.captions = captions;

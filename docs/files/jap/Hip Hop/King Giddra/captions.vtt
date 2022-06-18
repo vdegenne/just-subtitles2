@@ -2,7 +2,8 @@ WEBVTT
 
 STYLE
 ::cue {
-background-color: #ff0000ee;
+background-color:red;
+font-family: monos
 }
 
 00:00:00.193 --> 00:00:05.730
@@ -48,11 +49,5 @@ Quand tu erres dans la rue tu vois des tags et des danseurs partout.
 
 00:01:00.742 --> 00:01:05.898
 動き始めたオリジナル・シーン ライブだってかなり盛り上がるし
-
-00:01:05.898 --> 00:01:12.586
-ニューヨークから遠くこの東京 海を越え飛んできたその情報は丁度
-
-00:01:12.593 --> 00:01:15.593
-
 
 

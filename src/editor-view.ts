@@ -27,11 +27,11 @@ export class EditorView extends LitElement {
     return html`
     <style>
         #wrapper {
-          width: 600px;
+          /* width: 600px; */
           display: flex;
-          flex-direction: column;
+          /* flex-direction: column; */
           height: 100vh;
-          margin: 0 auto;
+          /* margin: 0 auto; */
         }
     </style>
     <div id=wrapper>

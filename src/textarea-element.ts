@@ -12,7 +12,7 @@ import { CueBlock } from './captions/Block'
 
 @customElement('textarea-element')
 export class TextareaElement extends LitElement {
-  private captions!: string;
+  private captions!: string = 'empty';
   private _lastCaptions: string = ''
   private vtt!: VTTCaptionsSuperStructure;
 

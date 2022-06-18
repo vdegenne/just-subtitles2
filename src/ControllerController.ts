@@ -23,6 +23,14 @@ export class ControllerController {
       .before('button0', ()=>{
         this.editor.togglePlay()
       })
+      .before('button1', ()=>{
+        if (!this.editor.videoElement.playing) {
+          this.editor.togglePlay()
+        }
+        else {
+          this.editor.videoElement.cancelPlayFroTo()
+        }
+      })
       // <-----
       .before('button14', ()=>{
         this.leftArrowPressed = true
