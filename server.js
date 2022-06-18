@@ -4,9 +4,9 @@ import statics from 'koa-static'
 import mount from 'koa-mount'
 import fs from 'node:fs'
 import koaBody from 'koa-body'
-import path, { extname } from 'node:path'
+import path, { extname, join as pathJoin } from 'node:path'
 import open from 'open'
-import { getTree, localURI, projectExists } from './util.js'
+import { getTree, localURI, projectExists, createDirectory } from './util.js'
 import {promisify} from 'util'
 const glob = promisify((await import('glob')).default)
 
@@ -56,6 +56,21 @@ router.get('/api/get-captions', async ctx => {
       captions = ''
     }
     return ctx.body = captions
+  }
+})
+
+router.post('/api/create-directory', async ctx => {
+  try {
+    const { path, name } = ctx.request.body
+    if (path && name) {
+      await createDirectory(pathJoin('docs', path, name))
+      return ctx.body = ''
+    } else {
+      throw new Error;
+    }
+  } catch (e) {
+    console.log(e)
+    ctx.throw()
   }
 })
 

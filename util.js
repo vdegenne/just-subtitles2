@@ -1,4 +1,5 @@
 import fs, { statSync } from 'fs';
+import { mkdir } from 'fs/promises';
 import path, { join as pathJoin } from 'path';
 
 export function localURI (pathname) {
@@ -44,13 +45,15 @@ export function getTree (path) {
     return {
       type: 'project',
       path: path.split(sep).slice(1).join(sep).replace(/\\/g, '/'),
+      name: path.split(sep).pop()
     }
   }
   else if (isPathDirectory(path)) {
     return {
       type: 'directory',
       path: path.split(sep).slice(1).join(sep).replace(/\\/g, '/'),
-      child: getPathDirectories(path).map(directory => getTree(pathJoin(path, directory)))
+      child: getPathDirectories(path).map(directory => getTree(pathJoin(path, directory))),
+      name: path.split(sep).pop()
     }
   }
 }
@@ -64,3 +67,12 @@ export function isPathDirectory (path) {
   return !fs.existsSync(pathJoin(path, 'meta.json'))
 }
 export function isProjectDirectory (path) { return !isPathDirectory(path) }
+
+
+
+export async function createDirectory (path) {
+  if (fs.existsSync(path)) {
+    throw new Error('The directory already exists')
+  }
+  await mkdir(path, { recursive: true })
+}

@@ -14,3 +14,17 @@ export function arrayLinearEquals (a1: Array<any>, a2: Array<any>): boolean {
 export function sleep (sleepMs: number) {
   return new Promise((resolve, reject) => { setTimeout(resolve, sleepMs) })
 }
+
+
+export async function createDirectory (path: string, name: string) {
+  const response = await fetch('/api/create-directory', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ path, name })
+  })
+  if (response.status != 200) {
+    throw new Error('Couldn\'t create directory')
+  }
+}
