@@ -70,14 +70,17 @@ export function isProjectDirectory (path) { return !isPathDirectory(path) }
 
 
 
-export async function createDirectory (path) {
-  if (fs.existsSync(path)) {
+export async function createDirectory (pathStartingWithDocs) {
+  if (fs.existsSync(pathStartingWithDocs)) {
     throw new Error('The directory already exists')
   }
-  await mkdir(path, { recursive: true })
+  await mkdir(pathStartingWithDocs, { recursive: true })
 }
 
+export async function saveMeta (projectLocationStartingWithDocs, meta) {
+  await fs.promises.writeFile(path.join(projectLocationStartingWithDocs, 'meta.json'), JSON.stringify(meta))
+}
 
-export async function getMetaData (projectLocationWithDocs) {
-  return JSON.parse(await fs.promises.readFile(path.join(projectLocationWithDocs, 'meta.json')))
+export async function getMetaData (projectLocationStartingWithDocs) {
+  return JSON.parse(await fs.promises.readFile(path.join(projectLocationStartingWithDocs, 'meta.json')))
 }

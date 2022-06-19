@@ -28,3 +28,17 @@ export async function createDirectory (path: string, name: string) {
     throw new Error('Couldn\'t create directory')
   }
 }
+
+
+export async function createProject (path: string, name: string, youtube: string) {
+  const response = await fetch('/api/create-project', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({ path, name, youtube })
+  })
+  if (response.status != 200) {
+    throw new Error('Couldn\'t create project')
+  }
+}

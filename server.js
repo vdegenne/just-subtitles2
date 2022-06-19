@@ -6,7 +6,7 @@ import fs from 'node:fs'
 import koaBody from 'koa-body'
 import path, { extname, join as pathJoin } from 'node:path'
 import open from 'open'
-import { getTree, localURI, projectExists, createDirectory, isProjectDirectory, getMetaData } from './util.js'
+import { getTree, localURI, projectExists, createDirectory, isProjectDirectory, getMetaData, saveMeta } from './util.js'
 import {promisify} from 'util'
 const glob = promisify((await import('glob')).default)
 import {WebSocketServer} from 'ws'
@@ -71,7 +71,26 @@ router.post('/api/create-directory', async ctx => {
       throw new Error;
     }
   } catch (e) {
-    console.log(e)
+    ctx.throw()
+  }
+})
+
+router.post('/api/create-project', async ctx => {
+  try {
+    const { path, name, youtube } = ctx.request.body
+    if (path && name && youtube) {
+      const target = pathJoin('docs', path, name)
+      await createDirectory(target)
+      await saveMeta(target, {
+        state: 'pending',
+        youtube
+      })
+      return ctx.body = ''
+    }
+    else {
+      throw new Error;
+    }
+  } catch (e) {
     ctx.throw()
   }
 })

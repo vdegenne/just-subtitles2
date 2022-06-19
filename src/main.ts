@@ -1,6 +1,6 @@
 import { LitElement, html, css, nothing } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
-import { createDirectory } from './util'
+import { createDirectory, createProject } from './util'
 
 type ProjectLeaf = { type: 'project', path: string, name: string }
 type DirectoryLeaf = { type: 'directory', path: string, child: Tree, name: string }
@@ -24,7 +24,7 @@ export class AppContainer extends LitElement {
     max-width: 500px;
     margin: 0 auto;
   }
-  .directory {
+  .directory, .project {
     display: flex;
     align-items: center;
     cursor: pointer;
@@ -32,11 +32,14 @@ export class AppContainer extends LitElement {
     margin: 8px;
     border-radius: 12px;
   }
-  .directory:hover {
+  .directory:hover, .project:hover {
     background-color: #eee;
   }
-  .directory > mwc-icon {
+  .directory > mwc-icon, .project > mwc-icon {
     margin-right: 10px;
+  }
+  .project[state=pending] {
+    color: red;
   }
   [hide] {
     display: none;
@@ -62,20 +65,31 @@ export class AppContainer extends LitElement {
     <h2 style="padding-left:24px">${directory.path}</h2>
     <div id=child>
       <div class=directory @click=${()=>{this.path = this.path.split('/').slice(0, -1).join('/')}} ?hide=${this.path == 'files'}>..</div>
-      ${(directory as DirectoryLeaf).child.map(c => html`
-      <div class=directory @click=${() => {
-        if (c.type == 'directory') { this.path = c.path }
-        else if (c.type == 'project') { window.location.pathname = `${c.path}/` }
-      }}>
-        <mwc-icon style="color:red">${c.type == 'directory' ? 'folder' : 'video_stable'}</mwc-icon><span>${c.path.split('/').pop()}</span>
-      </div>
-      `)}
+      ${(directory as DirectoryLeaf).child.map(c => {
+        if (c.type == 'directory') {
+          return html`
+          <div class=directory @click=${() => { this.path = c.path }}>
+            <mwc-icon>folder</mwc-icon><span>${c.path.split('/').pop()}</span>
+          </div>
+          `
+        }
+        else if (c.type == 'project') {
+          return html`
+          <div class=project state=${'pending'} @click=${() => { window.location.pathname = `${c.path}/` }}>
+            <mwc-icon>video_stable</mwc-icon><span>${c.path.split('/').pop()}</span>
+          </div>
+          `
+        }
+      })}
     </div>
 
     <div style="text-align:center">
       <mwc-button unelevated icon=folder
           style="--mdc-theme-primary:#fb8c00;--mdc-theme-on-primary:white;"
           @click=${()=>{this.onNewFolderClick()}}>new folder</mwc-button>
+      <mwc-button unelevated icon=video_stable
+          style="--mdc-theme-primary:#673ab7;--mdc-theme-on-primary:white;"
+          @click=${()=>{this.onNewProjectClick()}}>new project</mwc-button>
     </div>
     `
   }
@@ -91,6 +105,23 @@ export class AppContainer extends LitElement {
       createDirectory(this.path, name).then(() => {
         this.refreshTree()
       })
+    }
+  }
+
+  onNewProjectClick() {
+    const name = prompt('Project name')
+    if (name) {
+      const youtube = prompt('Youtube URL')
+      if (youtube) {
+        const cwd = this.cwd() as DirectoryLeaf
+        if (cwd.child.some(c=>c.name === name)) {
+          window.toast('This directory already exists')
+          return
+        }
+        createProject(this.path, name, youtube).then(() => {
+          this.refreshTree()
+        })
+      }
     }
   }
 }
