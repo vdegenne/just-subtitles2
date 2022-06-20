@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons&display=block" rel="stylesheet">
+
+    <link rel="shortcut icon" href="/img/android-chrome-192x192.png" type="image/x-icon">
+    <link rel="icon" href="/img/android-chrome-192x192.png" type="image/x-icon">
   </head>
   <body>
     <style>
@@ -17,6 +21,8 @@
 
     <editor-view></editor-view>
 
+    <mwc-snackbar id=snackbar></mwc-snackbar>
+
     <script type="module" src="/app.js"></script>
     <!-- <script src="/vim.min.js"></script>
     <script src="/jsvim.js"></script>
@@ -27,5 +33,30 @@
         });
       }, 1000)
     </script> -->
+
+    <script>
+      let toastTimeout;
+      window.toast = function (labelText, timeoutMs = 4000) {
+        snackbar.labelText = labelText;
+        if (timeoutMs >= 4000 || timeoutMs === -1) {
+          snackbar.timeoutMs = timeoutMs;
+          snackbar.open = true;
+        }
+        else {
+          if (toastTimeout) { clearTimeout(toastTimeout) }
+          snackbar.timeoutMs = -1;
+          snackbar.open = true;
+          toastTimeout = setTimeout(function () {
+            snackbar.close()
+            toastTimeout = null
+          }, timeoutMs)
+        }
+      }
+
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js');
+      }
+    </script>
   </body>
 </html>

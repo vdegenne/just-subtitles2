@@ -9,6 +9,7 @@ import './main'
 import './editor-view'
 import './video-element'
 import './textarea-element'
+import './timestamp-element'
 
 import { AppContainer } from './main';
 

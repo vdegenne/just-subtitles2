@@ -113,9 +113,9 @@ app.use(async ctx => {
 app.listen(port, function () {
   console.log(`http://localhost:${port}/`)
   const env = process.env.ENV
-  if (env && env.toLocaleLowerCase() == 'prod') {
-    open(`http://localhost:${port}/`)
-  }
+  // if (env && env.toLocaleLowerCase() == 'prod') {
+  //   open(`http://localhost:${port}/`)
+  // }
 })
 
 

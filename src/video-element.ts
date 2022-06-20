@@ -1,9 +1,10 @@
 import { css, html, LitElement, nothing, PropertyValueMap } from 'lit'
 import { customElement, query, state } from 'lit/decorators.js'
+import { TimeStampElement } from './timestamp-element';
+import { timeToLiteralTimestamp } from './util';
 
 @customElement('video-element')
 export class VideoElement extends LitElement {
-  @query('video') videoElement!: HTMLVideoElement;
 
   @state() source?: string;
   // @state() captionsSource?: string;
@@ -11,24 +12,50 @@ export class VideoElement extends LitElement {
 
   @state() playing = false
 
+  @state() controls = false
+  @state() speed = 1;
+
+  @query('video') videoElement!: HTMLVideoElement;
+  @query('#currentTime') timestampElement!: TimeStampElement;
+
   static styles = css`
+  :host {
+    color: white;
+  }
   video {
     display: block;
     width: 100%;
   }
   video::-webkit-media-controls-panel {
-   opacity: 1 !important;
+    opacity: 1 !important;
+  }
+
+  #info, #info > div {
+    display: flex;
+    align-items: center;
+  }
+  #info {
+    justify-content: space-between;
+    padding: 6px 12px;
+    background-color: #212121;
+  }
+  #info > div > mwc-icon {
+    margin-right: 5px;
   }
   `
 
   render() {
     return html`
-    <video controls>
+    <video ?controls=${this.controls}>
     ${this.source ? html`
       <source src="./${this.source}">
     `: nothing}
       <track src="./captions.vtt?${this.updateTime}" default>
     </video>
+    <div id=info>
+      <div><mwc-icon>speed</mwc-icon><span>${this.speed}</span></div>
+      <div><timestamp-element id=currentTime style="color:#9e9e9e" .colors=${undefined}></timestamp-element></div>
+    </div>
     `
   }
 
@@ -39,6 +66,12 @@ export class VideoElement extends LitElement {
     //   // await new Promise((resolve) => { setTimeout(resolve, 0)})
     //   this.videoElement.setAttribute('controls', 'controls')
     // }
+
+    // const currentTimeStamp = new TimeStamp(this.videoElement.currentTime)
+    this.videoElement.ontimeupdate = (e) => {
+      const timestamp = timeToLiteralTimestamp((e.target as HTMLVideoElement).currentTime)
+      this.timestampElement.timestamp =  timestamp
+    }
   }
 
   togglePlay() {
@@ -81,10 +114,14 @@ export class VideoElement extends LitElement {
   }
 
   speedDown() {
-    this.videoElement.playbackRate = this.videoElement.playbackRate - 0.25
+    this.speed -= 0.125
+    this.videoElement.playbackRate = this.speed
+    // window.toast(''+this.speed, 1000)
   }
   speedUp() {
-    this.videoElement.playbackRate = this.videoElement.playbackRate + 0.25
+    this.speed += 0.125
+    this.videoElement.playbackRate = this.speed
+    // window.toast(''+this.speed, 1000)
   }
 
 

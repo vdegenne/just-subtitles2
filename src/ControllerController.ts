@@ -68,8 +68,14 @@ export class ControllerController {
         }
       })
       .before('button7', ()=>{
-        this.editor.playInterval(false)
-        // this.editor.togglePlayInterval()
+        if (this.secondary) {
+          this.editor.videoElement.stop()
+          this.editor.clingVideoToStartTime()
+          this.editor.togglePlay()
+        }
+        else {
+          this.editor.playInterval(false)
+        }
       })
 
       .before('button4', ()=>{
@@ -88,7 +94,14 @@ export class ControllerController {
           this.editor.clingVideoToEndTime()
         }
       })
-      .before('button10', ()=>this.editor.clingStartTimeToVideoCurrentTime())
+      .before('button10', ()=>{
+        if (this.secondary) {
+          this.editor.clingStartTimeToPreviousCueEndTime()
+        }
+        else {
+          this.editor.clingStartTimeToVideoCurrentTime()
+        }
+      })
       .before('button11', ()=>this.editor.clingEndTimeToVideoCurrentTime())
 
       .before('button6', ()=>this.secondary=true)

@@ -1,8 +1,6 @@
 import { html, LitElement, PropertyValueMap } from 'lit'
-import { customElement, query, state } from 'lit/decorators.js'
-// import {VTTCue} from '../docs/modules/captions/Cue';
-import {getVideoName} from '../docs/util.js'
-import { VTTCaptionsSuperStructure } from './captions/CaptionsSuperStructure.js';
+import { customElement, query } from 'lit/decorators.js'
+import {getMetadata, getVideoName} from '../docs/util.js'
 import { ControllerController } from './ControllerController.js';
 import { TextareaElement } from './textarea-element.js';
 import { VideoElement } from './video-element.js';
@@ -11,10 +9,12 @@ import { VideoElement } from './video-element.js';
 @customElement('editor-view')
 export class EditorView extends LitElement {
 
+  private meta;
   private controllerController = new ControllerController(this)
 
   constructor () {
     super()
+    getMetadata().then(metadata => { this.meta = metadata })
     getVideoName().then(videoname => {
       this.videoElement.loadVideo(videoname)
     })
@@ -35,7 +35,15 @@ export class EditorView extends LitElement {
         }
     </style>
     <div id=wrapper>
-      <video-element></video-element>
+      <div>
+        <video-element></video-element>
+        <div>
+          <mwc-icon-button style="color:red" icon=smart_display
+              @click=${()=>{this.openYouTubeAtTime(this.videoElement.currentTime)}}></mwc-icon-button>
+          <mwc-icon-button style="color:white" icon=display_settings
+              @click=${()=>{this.videoElement.controls = !this.videoElement.controls}}></mwc-icon-button>
+        </div>
+      </div>
       <textarea-element
         style="display:flex;flex:1;flex-direction: column"
         @change=${()=>{this.videoElement.reloadCaptions()}}></textarea-element>
@@ -157,7 +165,7 @@ export class EditorView extends LitElement {
 
   insertNewCue() {
     const currentTime = this.videoElement.currentTime + 0.001
-    this.textareaElement.insertNewCue(currentTime, currentTime + 3)
+    this.textareaElement.insertNewCue(currentTime, currentTime + 4)
   }
 
   stretchStartTimeToLeft(time = 0.1) {
@@ -205,6 +213,8 @@ export class EditorView extends LitElement {
   clingStartTimeToVideoCurrentTime () { this.textareaElement.setCurrentCueStartTime(this.videoElement.currentTime) }
   clingEndTimeToVideoCurrentTime () { this.textareaElement.setCurrentCueEndTime(this.videoElement.currentTime) }
 
+  clingStartTimeToPreviousCueEndTime () { this.textareaElement.clingStartTimeToPreviousCueEndTime() }
+
   previousCue () { this.textareaElement.moveCaretToPreviousCue() }
   nextCue () { this.textareaElement.moveCaretToNextCue() }
   lastCue () { this.textareaElement.moveCaretToLastCue() }
@@ -237,6 +247,9 @@ export class EditorView extends LitElement {
   //   }
   // }
 
+  openYouTubeAtTime (time: number): void {
+    window.open(`${this.meta.youtube}&t=${Math.floor(time)}`, '_blank')
+  }
   protected createRenderRoot(): Element | ShadowRoot {
     return this;
   }

@@ -46,7 +46,7 @@ export class CaptionsSuperStructureBase implements CaptionsSuperStructure {
   }
 
   getCueBlockFromIndex (index: number) {
-    return this.blocks.filter(b=>isCue(b))[index]
+    return this.blocks.filter(b=>isCue(b))[index] as CueBlock|undefined
   }
 
   getBlockIndex(block:Block) {

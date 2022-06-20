@@ -9,42 +9,38 @@ export class TimeStamp {
   protected static milliSeparator = '.'
 
   protected raw: string|number;
-  protected hours: number;
-  protected minutes: number;
-  protected seconds: number;
-  protected milliseconds: number;
+  public hours: number;
+  public minutes: number;
+  public seconds: number;
+  public milliseconds: number;
 
 
   constructor(input: string|number) {
     this.raw = input
     if (typeof input == 'string') {
       const parts = input.split((this.constructor as typeof TimeStamp).timeSeparator as string)
-      this.hours = parseInt(parts[0])
-      this.minutes = parseInt(parts[1])
+      this.hours = +parts[0]
+      this.minutes = +parts[1]
       const secondParts = parts[2].split((this.constructor as typeof TimeStamp).milliSeparator as string)
-      this.seconds = parseInt(secondParts[0])
-      if (secondParts[1]) {
-        this.milliseconds = parseInt(secondParts[1])
-      } else {
-        this.milliseconds = 0
-      }
+      this.seconds = +secondParts[0]
+      this.milliseconds = secondParts[1] ? +secondParts[1] : 0;
     }
     else if (typeof input == 'number') {
-      this.hours = 0
-      this.minutes = 0
-      input = ''+input
-      const parts = input.split('.')
-      this.seconds = parseInt(parts[0])
+      const parts = (''+input).split('.')
+      const totalSecs = +parts[0]
+      this.hours = ~~(totalSecs / 3600)
+      this.minutes = ~~(totalSecs % 3600 / 60)
+      this.seconds = totalSecs % 60
       this.milliseconds = Math.trunc(parseFloat('0.' + (parts[1] || 0)) * 1000)
-      if (this.seconds / 60 >= 1) {
-        this.minutes = Math.floor(this.seconds / 60)
-        this.seconds -= this.minutes * 60
+      // if (this.seconds / 60 >= 1) {
+      //   this.minutes = Math.floor(this.seconds / 60)
+      //   this.seconds -= this.minutes * 60
 
-        if (this.minutes / 60 >= 1) {
-          this.hours = Math.floor(this.minutes / 60)
-          this.minutes -= this.hours * 60
-        }
-      }
+      //   if (this.minutes / 60 >= 1) {
+      //     this.hours = Math.floor(this.minutes / 60)
+      //     this.minutes -= this.hours * 60
+      //   }
+      // }
     }
     else {
       throw new Error('unknown type')
@@ -82,10 +78,10 @@ export class TimeStamp {
   }
   /**
    * Substract x milliseconds from the timecode
-   * @param {number} x milliseconds
+   * @param {number} milliseconds milliseconds
    */
-  substract(x: number) {
-    this.milliseconds -= x
+  substract(milliseconds: number) {
+    this.milliseconds -= milliseconds
     if (this.milliseconds < 0) {
       const seconds = Math.floor(Math.abs(this.milliseconds) / 1000)
       this.milliseconds = 1000 - Math.abs(this.milliseconds + seconds * 1000)

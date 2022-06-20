@@ -42,3 +42,17 @@ export async function createProject (path: string, name: string, youtube: string
     throw new Error('Couldn\'t create project')
   }
 }
+
+export function pad(value: number, padding = 2) {
+  return (''+value).padStart(padding, '0')
+}
+
+export function timeToLiteralTimestamp (time: number) {
+  const parts = (''+time).split('.')
+  const total = +parts[0]
+  const hours = ~~(total / 3600)
+  const minutes = ~~(total % 3600 / 60)
+  const seconds = total % 60
+  const milliseconds = Math.trunc(parseFloat('0.' + (parts[1] || 0)) * 1000)
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(milliseconds, 3)}`
+}

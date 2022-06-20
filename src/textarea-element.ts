@@ -180,6 +180,23 @@ export class TextareaElement extends LitElement {
     this.saveCaptions()
   }
 
+  clingStartTimeToPreviousCueEndTime () {
+    const cueIndex = this.getCurrentCueIndex()
+    if (cueIndex >= 0) {
+      const currentCueBlock = this.vtt.getCueBlockFromIndex(cueIndex)
+      if (currentCueBlock) {
+        const previousCueBlock = this.vtt.getCueBlockFromIndex(cueIndex - 1)
+        if (previousCueBlock && previousCueBlock.cue.endTime) {
+          currentCueBlock.cue.startTime = new TimeStamp(previousCueBlock.cue.endTime.toSeconds())
+          currentCueBlock.cue.startTime.add(1)
+          this.updateTextAreaFromRepresentation()
+          this.saveCaptions()
+        }
+      }
+    }
+  }
+
+
   /**
    * @returns The current timecode (before the caret) or null if no time were found
    */
@@ -264,7 +281,9 @@ export class TextareaElement extends LitElement {
   }
 
   updateTextAreaFromRepresentation () {
+    const selectionStart = this.textarea.selectionStart
     this.textarea.value = this.vtt.toString()
+    this.setCaretPosition(selectionStart)
     // @ts-ignore
     // console.log(this.vtt.blocks, this.vtt.toString())
   }
