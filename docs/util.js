@@ -13,3 +13,9 @@ export async function getVideoName () {
   if (r.status !== 200) { throw new Error('Video not found') }
   return await r.text()
 }
+
+
+export function getIdFromYoutubeUrl (url) {
+  const urlObject = new URL(url)
+  return urlObject.searchParams.get('v')
+}

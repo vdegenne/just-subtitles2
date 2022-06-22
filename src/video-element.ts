@@ -1,26 +1,59 @@
 import { css, html, LitElement, nothing, PropertyValueMap } from 'lit'
 import { customElement, query, state } from 'lit/decorators.js'
+import { getIdFromYoutubeUrl, getMetadata } from '../docs/util';
 import { TimeStampElement } from './timestamp-element';
-import { timeToLiteralTimestamp } from './util';
+import { sleep, timeToLiteralTimestamp } from './util';
+import { YoutubePlayerWrapper } from './YoutubePlayerWrapper';
+
+declare global {
+  interface Window {
+    onYouTubeIframeAPIReady: Function;
+  }
+}
+
+declare type Mode = 'local'|'youtube'
 
 @customElement('video-element')
 export class VideoElement extends LitElement {
 
+  /**
+   * State
+   */
+  @state() private mode: Mode = 'local';
   @state() source?: string;
-  // @state() captionsSource?: string;
   @state() updateTime = Date.now();
-
   @state() playing = false
-
   @state() controls = false
   @state() speed = 1;
 
-  @query('video') videoElement!: HTMLVideoElement;
+  private youtubeScript?: HTMLScriptElement;
+  private youtubePlayerWrapper?: YoutubePlayerWrapper;
+
+
+  /**
+   * Queries
+   */
+  get videoElement (): HTMLVideoElement {
+    if (this.mode == 'local') {
+      return this.shadowRoot!.querySelector('video')!
+    }
+    else {
+      return this.youtubePlayerWrapper!
+    }
+  }
+  // @query('video') videoElement!: HTMLVideoElement;
+  @query('#youtubeElement') youtubeElement!: HTMLDivElement;
   @query('#currentTime') timestampElement!: TimeStampElement;
 
   static styles = css`
   :host {
     color: white;
+  }
+  .videoContainer {
+    display: none;
+  }
+  .videoContainer[active] {
+    display: block;
   }
   video {
     display: block;
@@ -45,14 +78,25 @@ export class VideoElement extends LitElement {
   }
   `
 
+  /**
+   * Render
+   */
   render() {
     return html`
-    <video ?controls=${this.controls}>
-    ${this.source ? html`
-      <source src="./${this.source}">
-    `: nothing}
-      <track src="./captions.vtt?${this.updateTime}" default>
-    </video>
+    <!-- local -->
+    <div class="videoContainer" ?active=${this.mode == 'local'}>
+      <video ?controls=${this.controls}>
+      ${this.source ? html`
+        <source src="./${this.source}">
+      `: nothing}
+        <track src="./captions.vtt?${this.updateTime}" default>
+      </video>
+    </div>
+    <!-- youtube -->
+    <div class="videoContainer" ?active=${this.mode == 'youtube'}>
+      <div id="youtubeElement" style="display:block"></div>
+    </div>
+    <!-- video informations -->
     <div id=info>
       <div><mwc-icon>speed</mwc-icon><span style="min-width:50px">${this.speed}</span></div>
       <div>${this._seekForEndInterval ? html`<mwc-icon style="background-color:#ffc107;color:black;">hourglass_empty</mwc-icon>` : nothing}</div>
@@ -74,6 +118,13 @@ export class VideoElement extends LitElement {
       const timestamp = timeToLiteralTimestamp((e.target as HTMLVideoElement).currentTime)
       this.timestampElement.timestamp =  timestamp
     }
+
+    // bind class method to the API call
+    window.onYouTubeIframeAPIReady = this.onYouTubeIframeAPIReady.bind(this)
+  }
+
+  onTimeUpdate (e) {
+    console.log(e.target)
   }
 
   togglePlay() {
@@ -89,11 +140,24 @@ export class VideoElement extends LitElement {
     }
   }
   play() {
-    this.videoElement.play()
+    // if (this.videoElement instanceof HTMLVideoElement) {
+    //   this.videoElement.play()
+    // }
+    // else if (this.videoElement instanceof YT.Player) {
+      this.videoElement.play()
+    // }
     this.playing = true
   }
-  stop() {
-    this.videoElement.pause()
+  stop(at?: number) {
+    // if (this.videoElement instanceof HTMLVideoElement) {
+    //   this.videoElement.pause()
+    // }
+    // else if (this.videoElement instanceof YT.Player) {
+    if (at) {
+      this.videoElement.currentTime = at
+    }
+      this.videoElement.pause()
+    // }
     this.playing = false
   }
   pause() { this.stop() }
@@ -139,23 +203,35 @@ export class VideoElement extends LitElement {
     this._seekForEndResolve = undefined
     this._seekForEndReject = undefined
   }
-  playFroTo (fro: number, to: number, resetOnEnd = false) {
+  async playFroTo (fro: number, to: number, resetOnEnd = false) {
     this.clearPlayFroTo()
     this.videoElement.currentTime = fro
+    // on "youtube" mode setting the currentTime is slower because the video is buffered from a remote server
+    // then we wait for the chunk to finish loading
+    if (this.mode == 'youtube') {
+      // await (this.videoElement as YoutubePlayerWrapper).playResume
+      // await sleep(200)
+      const past = Date.now()
+      await (this.videoElement as YoutubePlayerWrapper).seekComplete
+      console.log(`seek complete after ${(Date.now() - past)} ms`)
+    }
+
+    if (!this.playing) {
+      this.togglePlay()
+    }
+
+
     return new Promise((resolve, reject) => {
       this._seekForEndResolve = resolve
       this._seekForEndReject = reject
 
-      if (!this.playing) {
-        this.togglePlay()
-      }
       // interval
       this._seekForEndInterval = setInterval(() => {
         if (this.playing) {
           if (this.videoElement.currentTime >= to) {
             if (this._seekForEndResolve) {
               // this.togglePlay()
-              this.stop()
+              this.stop(to)
               if (resetOnEnd) {
                 this.videoElement.currentTime = fro
               }
@@ -165,7 +241,7 @@ export class VideoElement extends LitElement {
             this.clearPlayFroTo()
           }
         }
-      }, 10)
+      }, 5)
     })
   }
   cancelPlayFroTo () {
@@ -182,5 +258,50 @@ export class VideoElement extends LitElement {
 
   set currentTime (value: number) {
     this.videoElement.currentTime = value
+  }
+
+
+  /**
+   * Youtube
+   */
+
+  switchMode () {
+    if (this.mode == 'local') {
+      this.mode = 'youtube'
+      this.activateYouTube()
+    }
+    else {
+      this.mode  = 'local'
+    }
+  }
+
+  activateYouTube() {
+    if (!this.youtubeScript) {
+      this.youtubeScript = document.createElement('script');
+      this.youtubeScript.src = "https://www.youtube.com/iframe_api";
+      this.shadowRoot!.append(this.youtubeScript)
+    }
+  }
+
+  async onYouTubeIframeAPIReady () {
+    const {youtube: youtubeUrl} = await getMetadata()
+    const videoId = getIdFromYoutubeUrl(youtubeUrl)!
+    // this.player =
+    const player = new window.YT.Player(this.youtubeElement, {
+      // height: '195',
+      // width: '320',
+      videoId,
+      playerVars: {
+        'playsinline': 1,
+      },
+      events: {
+        'onReady': (e) => {
+          e.target.setVolume(50)
+        },
+        'onStateChange': e => { console.log(e) }
+      }
+    });
+
+    this.youtubePlayerWrapper = new YoutubePlayerWrapper(player)
   }
 }

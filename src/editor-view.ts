@@ -47,7 +47,7 @@ export class EditorView extends LitElement {
         <video-element></video-element>
         <div>
           <mwc-icon-button style="color:red" icon=smart_display
-              @click=${()=>{this.openYouTubeAtTime(this.videoElement.currentTime)}}></mwc-icon-button>
+              @click=${()=>{this.videoElement.switchMode();return;this.openYouTubeAtTime(this.videoElement.currentTime)}}></mwc-icon-button>
           <mwc-icon-button style="color:white" icon=display_settings
               @click=${()=>{this.videoElement.controls = !this.videoElement.controls}}></mwc-icon-button>
         </div>

@@ -17,6 +17,7 @@
     "@types/glob": "^7.2.0",
     "@types/koa-router": "^7.4.4",
     "@types/ws": "^8.5.3",
+    "@types/youtube": "^0.0.46",
     "browser-sync": "^2.27.7",
     "gamecontroller.js": "^1.5.0",
     "lit": "^2.2.5",
