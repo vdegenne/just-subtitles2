@@ -1,5 +1,5 @@
 import { EditorView } from './editor-view';
-import { arrayLinearEquals, sleep } from './util';
+import { sleep } from './util';
 import gameControl from 'gamecontroller.js/src/gamecontrol.js'
 
 export class ControllerController {
@@ -56,7 +56,14 @@ export class ControllerController {
       })
       .after('button15', ()=>{ this.rightArrowPressed = false })
 
-      .before('button3', ()=>this.editor.insertNewCue())
+      .before('button3', () => {
+        // if (!this.secondary) {
+          this.editor.insertNewCue()
+        // }
+        if (this.secondary) {
+          this.editor.clingStartTimeToPreviousCueEndTime()
+        }
+      })
 
       .before('button12', ()=>this.editor.previousCue())
       .before('button13', ()=>{
@@ -108,10 +115,10 @@ export class ControllerController {
       .after('button6', ()=>this.secondary=false)
 
 
-      .before('left0', ()=>this.editor.stretchStartTimeToLeft(this.secondary ? 0.1 : 1))
-      .before('right0', ()=>this.editor.stretchStartTimeToRight(this.secondary ? 0.1 : 1))
-      .before('left1', ()=>this.editor.stretchEndTimeToLeft(this.secondary ? 0.1 : 1))
-      .before('right1', ()=>this.editor.stretchEndTimeToRight(this.secondary ? 0.1 : 1))
+      .before('left0', ()=>this.editor.stretchStartTimeToLeft(!this.secondary ? 0.1 : 1))
+      .before('right0', ()=>this.editor.stretchStartTimeToRight(!this.secondary ? 0.1 : 1))
+      .before('left1', ()=>this.editor.stretchEndTimeToLeft(!this.secondary ? 0.1 : 1))
+      .before('right1', ()=>this.editor.stretchEndTimeToRight(!this.secondary ? 0.1 : 1))
     })
     // window.addEventListener("gamepadconnected", (e) => {
     //   this.gamepad = e.gamepad

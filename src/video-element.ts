@@ -33,6 +33,7 @@ export class VideoElement extends LitElement {
   #info, #info > div {
     display: flex;
     align-items: center;
+    color: #9e9e9e;
   }
   #info {
     justify-content: space-between;
@@ -53,7 +54,8 @@ export class VideoElement extends LitElement {
       <track src="./captions.vtt?${this.updateTime}" default>
     </video>
     <div id=info>
-      <div><mwc-icon>speed</mwc-icon><span>${this.speed}</span></div>
+      <div><mwc-icon>speed</mwc-icon><span style="min-width:50px">${this.speed}</span></div>
+      <div>${this._seekForEndInterval ? html`<mwc-icon style="background-color:#ffc107;color:black;">hourglass_empty</mwc-icon>` : nothing}</div>
       <div><timestamp-element id=currentTime style="color:#9e9e9e" .colors=${undefined}></timestamp-element></div>
     </div>
     `
@@ -125,6 +127,7 @@ export class VideoElement extends LitElement {
   }
 
 
+  @state()
   private _seekForEndInterval?: NodeJS.Timer
   private _seekForEndResolve?: (value: unknown) => void
   private _seekForEndReject?: (reason?: any) => void
@@ -139,32 +142,31 @@ export class VideoElement extends LitElement {
   playFroTo (fro: number, to: number, resetOnEnd = false) {
     this.clearPlayFroTo()
     this.videoElement.currentTime = fro
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       this._seekForEndResolve = resolve
       this._seekForEndReject = reject
-    })
-    if (!this.playing) {
-      this.togglePlay()
-    }
-    // interval
-    this._seekForEndInterval = setInterval(() => {
-      if (this.playing) {
-        if (this.videoElement.currentTime >= to) {
-          if (this._seekForEndResolve) {
-            // this.togglePlay()
-            this.stop()
-            if (resetOnEnd) {
-              this.videoElement.currentTime = fro
-            }
-            console.log(`stopped at ${this.videoElement.currentTime}`)
-            this._seekForEndResolve!(null)
-          }
-          this.clearPlayFroTo()
-        }
-      }
-    }, 10)
 
-    return promise
+      if (!this.playing) {
+        this.togglePlay()
+      }
+      // interval
+      this._seekForEndInterval = setInterval(() => {
+        if (this.playing) {
+          if (this.videoElement.currentTime >= to) {
+            if (this._seekForEndResolve) {
+              // this.togglePlay()
+              this.stop()
+              if (resetOnEnd) {
+                this.videoElement.currentTime = fro
+              }
+              console.log(`stopped at ${this.videoElement.currentTime}`)
+              this._seekForEndResolve!(null)
+            }
+            this.clearPlayFroTo()
+          }
+        }
+      }, 10)
+    })
   }
   cancelPlayFroTo () {
     if (this._seekForEndReject) {

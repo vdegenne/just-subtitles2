@@ -2,6 +2,7 @@ import { html, LitElement, PropertyValueMap } from 'lit'
 import { customElement, query } from 'lit/decorators.js'
 import {getMetadata, getVideoName} from '../docs/util.js'
 import { ControllerController } from './ControllerController.js';
+import { DownloadVideoDialog } from './download-video-dialog.js';
 import { TextareaElement } from './textarea-element.js';
 import { VideoElement } from './video-element.js';
 
@@ -11,12 +12,19 @@ export class EditorView extends LitElement {
 
   private meta;
   private controllerController = new ControllerController(this)
+  private downloadVideoDialog = new DownloadVideoDialog(this)
+
+  get projectPath () { return window.location.pathname }
 
   constructor () {
     super()
     getMetadata().then(metadata => { this.meta = metadata })
     getVideoName().then(videoname => {
       this.videoElement.loadVideo(videoname)
+    })
+    .catch(() => {
+      // video not found
+      this.downloadVideoDialog.show()
     })
   }
 
@@ -48,14 +56,15 @@ export class EditorView extends LitElement {
         style="display:flex;flex:1;flex-direction: column"
         @change=${()=>{this.videoElement.reloadCaptions()}}></textarea-element>
     </div>
+
+
+    ${this.downloadVideoDialog}
     `
   }
 
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     this.registerEventListeners()
   }
-
-
 
   async registerEventListeners () {
     await this.textareaElement.updateComplete
@@ -75,12 +84,12 @@ export class EditorView extends LitElement {
       // if (e.shiftKey && e.code == 'Period') {
       //   this.videoElement.speedUp()
       // }
-      if (e.code == 'Escape') {
-        preventAll(e)
-        this.videoElement.clearPlayFroTo()
-        this.videoElement.pause()
-        // this.videoElement.togglePlay()
-      }
+      // if (e.code == 'Escape') {
+      //   preventAll(e)
+      //   this.videoElement.clearPlayFroTo()
+      //   this.videoElement.pause()
+      //   // this.videoElement.togglePlay()
+      // }
       if (e.ctrlKey && e.code == 'Space' || (e.altKey && e.code == 'Enter')) {
         this.videoElement.togglePlay()
       }
@@ -181,7 +190,7 @@ export class EditorView extends LitElement {
     if (cue) {
       const startTime = cue.startTime.toSeconds()
       const endTime = cue.endTime!.toSeconds()
-      const from = endTime - 1 < startTime ? startTime : endTime - 1;
+      const from = endTime - 0.5 < startTime ? startTime : endTime - 0.5;
       this.videoElement.playFroTo(from, endTime)
     }
   }
@@ -190,7 +199,7 @@ export class EditorView extends LitElement {
     if (cue) {
       const startTime = cue.startTime.toSeconds()
       const endTime = cue.endTime!.toSeconds()
-      const from = endTime - 1 < startTime ? startTime : endTime - 1;
+      const from = endTime - 0.5 < startTime ? startTime : endTime - 0.5;
       this.videoElement.playFroTo(from, endTime)
     }
   }

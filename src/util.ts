@@ -1,20 +1,17 @@
 
-export function arrayLinearEquals (a1: Array<any>, a2: Array<any>): boolean {
-  let i = 0
-  for (; i < a1.length; i++) {
-    if (a1[i] !== a2[i]) {
-      return false
-    }
-  }
-  return true
-}
-
-
+// export function arrayLinearEquals (a1: Array<any>, a2: Array<any>): boolean {
+//   let i = 0
+//   for (; i < a1.length; i++) {
+//     if (a1[i] !== a2[i]) {
+//       return false
+//     }
+//   }
+//   return true
+// }
 
 export function sleep (sleepMs: number) {
   return new Promise((resolve, reject) => { setTimeout(resolve, sleepMs) })
 }
-
 
 export async function createDirectory (path: string, name: string) {
   const response = await fetch('/api/create-directory', {
@@ -28,7 +25,6 @@ export async function createDirectory (path: string, name: string) {
     throw new Error('Couldn\'t create directory')
   }
 }
-
 
 export async function createProject (path: string, name: string, youtube: string) {
   const response = await fetch('/api/create-project', {

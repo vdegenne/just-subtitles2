@@ -238,6 +238,10 @@ export class TextareaElement extends LitElement {
     this.setCaretPosition(lines.join(' ').length + 1)
   }
 
+  highlightCaret() {
+    this.textarea.selectionEnd = this.textarea.selectionStart + 1
+  }
+
   moveCaretToPreviousCue () {
     const cueIndex = this.getCurrentCueIndex()
     if (cueIndex > 0) {
@@ -245,6 +249,7 @@ export class TextareaElement extends LitElement {
       if (previousCueBlock) {
         this.goToLine(previousCueBlock.line + 1)
         this.focusToCaret()
+        this.highlightCaret()
         this.updateCueStrip()
       }
     }
@@ -256,6 +261,7 @@ export class TextareaElement extends LitElement {
       if (nextCueBlock) {
         this.goToLine(nextCueBlock.line + 1)
         this.focusToCaret()
+        this.highlightCaret()
         this.updateCueStrip()
       }
     // }
@@ -272,7 +278,8 @@ export class TextareaElement extends LitElement {
   focusToCaret() {
     this.textarea.blur()
     this.textarea.focus()
-    this.textarea.scrollBy(0, 10)
+    // this.textarea.scrollBy(0, 10)
+    // this.textarea.selectionEnd = this.textarea.selectionStart + 1
   }
 
   updateVTTRepresentation (input: string = this.captions) {
